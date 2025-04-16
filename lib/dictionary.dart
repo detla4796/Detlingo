@@ -30,6 +30,16 @@ class _DictionaryState extends State<Dictionary> {
       words.sort((a, b) => a.translation.toLowerCase().compareTo(b.translation.toLowerCase()));
     });
   }
+
+  bool hasDuplicate(ruWord) {
+    for (int i = 0; i < words.length; i++) {
+      if (words[i].translation == ruWord) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void addWord() {
     showDialog(
       barrierDismissible: false,
@@ -66,12 +76,23 @@ class _DictionaryState extends State<Dictionary> {
             TextButton(
               onPressed: () {
                 if (englishController.text.isNotEmpty && translationController.text.isNotEmpty) {
+                  if (hasDuplicate(translationController.text)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('This word already exists', style: TextStyle(color: Colors.black)),
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.deepPurpleAccent,
+                      ),
+                    );
+                  }
+                  else {
                   setState(() {
                     words.add(Words(englishController.text, translationController.text));
                   });
                   Navigator.of(context).pop();
                   englishController.clear();
                   translationController.clear();
+                  }
                 }
                 else {
                   ScaffoldMessenger.of(context).showSnackBar(
