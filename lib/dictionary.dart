@@ -17,7 +17,9 @@ class Words {
 class _DictionaryState extends State<Dictionary> {
   final TextEditingController englishController = TextEditingController();
   final TextEditingController translationController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   final List<Words> words = [];
+  List<Words> filteredWords = [];
 
   void sortEng() {
     setState(() {
@@ -31,11 +33,88 @@ class _DictionaryState extends State<Dictionary> {
     });
   }
 
-  bool hasDuplicate(ruWord) {
-    for (int i = 0; i < words.length; i++) {
-      if (words[i].translation == ruWord) {
-        return true;
+  void searchWord(query) { // поиск
+    setState(() {
+      if (query.isNotEmpty) {
+        filteredWords = words.where((word) {
+          return word.englishWord.toLowerCase().contains(query.toLowerCase()) || word.translation.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+        }
+    });
+  }
+
+  void showSearchDialog() { // окно с поиском
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Search word'),
+          content: TextField(
+            controller: searchController,
+            decoration: InputDecoration(
+              labelText: 'Enter word',
+            ),
+            onChanged: (value) {
+              searchWord(value);
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                searchController.clear();
+                setState(() {
+                  filteredWords.clear();
+                });
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                searchWord(searchController.text);
+              },
+              child: Text('Search'),
+            )
+          ],
+        );
       }
+    );
+  }
+
+  bool hasDuplicate(enWord, ruWord) {
+    bool hasExactMatch = false;
+    bool hasSimilarMatch = false;
+
+    for (int i = 0; i < words.length; i++) {
+      if (words[i].englishWord.toLowerCase() == enWord.toLowerCase() && words[i].translation.toLowerCase() == ruWord.toLowerCase()) {
+        hasExactMatch = true;
+        break;
+      }
+      if (words[i].englishWord.toLowerCase() != enWord.toLowerCase() && words[i].translation.toLowerCase() == ruWord.toLowerCase()) {
+        hasSimilarMatch = true;
+        break;
+      }
+    }
+    if (hasExactMatch) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('This word already exists', style: TextStyle(color: Colors.black)),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.deepPurpleAccent,
+        ),
+      );
+      return true;
+    }
+    if (hasSimilarMatch) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('This word already exists with a different translation', style: TextStyle(color: Colors.black)),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.deepPurpleAccent,
+        ),
+      );
+      return true;
     }
     return false;
   }
@@ -76,22 +155,13 @@ class _DictionaryState extends State<Dictionary> {
             TextButton(
               onPressed: () {
                 if (englishController.text.isNotEmpty && translationController.text.isNotEmpty) {
-                  if (hasDuplicate(translationController.text)) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('This word already exists', style: TextStyle(color: Colors.black)),
-                        duration: Duration(seconds: 2),
-                        backgroundColor: Colors.deepPurpleAccent,
-                      ),
-                    );
-                  }
-                  else {
-                  setState(() {
-                    words.add(Words(englishController.text, translationController.text));
-                  });
-                  Navigator.of(context).pop();
-                  englishController.clear();
-                  translationController.clear();
+                  if (!hasDuplicate(englishController.text, translationController.text)) {
+                    setState(() {
+                      words.add(Words(englishController.text, translationController.text));
+                    });
+                    Navigator.of(context).pop();
+                    englishController.clear();
+                    translationController.clear();
                   }
                 }
                 else {
@@ -150,19 +220,19 @@ class _DictionaryState extends State<Dictionary> {
             TextButton(
               onPressed: () {
                 if (englishController.text.isNotEmpty && translationController.text.isNotEmpty) {
-                  setState(() {
-                    words[index] = Words(englishController.text, translationController.text);
-                  });
-                  Navigator.of(context).pop();
-                  englishController.clear();
-                  translationController.clear();
-                } else {
+                  if (!hasDuplicate(englishController.text, translationController.text)) {
+                    setState(() {
+                      words.add(Words(englishController.text, translationController.text));
+                    });
+                    Navigator.of(context).pop();
+                    englishController.clear();
+                    translationController.clear();
+                  }
+                }
+                else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        'Please fill in both fields',
-                        style: TextStyle(color: Colors.black),
-                      ),
+                      content: Text('Please fill in both fields', style: TextStyle(color: Colors.black)),
                       duration: Duration(seconds: 2),
                       backgroundColor: Colors.deepPurpleAccent,
                     ),
@@ -181,6 +251,7 @@ class _DictionaryState extends State<Dictionary> {
   void dispose() {
     englishController.dispose();
     translationController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -200,11 +271,16 @@ class _DictionaryState extends State<Dictionary> {
             icon: Text("RU"),
             onPressed: sortRus,
           ),
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: showSearchDialog // кнопка окна поиска
+          ),
         ],
       ),
       body: ListView.builder(
-        itemCount: words.length,
+        itemCount: filteredWords.isEmpty ? words.length : filteredWords.length,
         itemBuilder: (context, index) {
+          final word = filteredWords.isEmpty ? words[index] : filteredWords[index];
           return Card(
             margin: EdgeInsets.all(8),
             child: ListTile(
@@ -212,8 +288,8 @@ class _DictionaryState extends State<Dictionary> {
                 '${index + 1}',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              title: Text('English: ${words[index].englishWord}'),
-              subtitle: Text('Translation: ${words[index].translation}'),
+              title: Text('English: ${word.englishWord}'),
+              subtitle: Text('Translation: ${word.translation}'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
