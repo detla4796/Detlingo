@@ -1,0 +1,11 @@
+{
+    "@@locale" : "en",
+    "titleSettings" : "Settings",
+    "@titleSettings" : {},
+    "music" : "Music",
+    "@music" : {},
+    "theme" : "Change theme",
+    "@theme" : {},
+    "language" : "Change language",
+    "@language" : {}
+}

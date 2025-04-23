@@ -1,5 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:lessons_app/generated/s.dart';
+import 'package:provider/provider.dart';
+
+class ThemeProvider with ChangeNotifier {
+  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode get themeMode => _themeMode;
+
+  void toggleTheme(isDark) {
+    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+}
+
+class LocaleProvider with ChangeNotifier {
+  Locale _locale = Locale('en');
+  Locale get locale => _locale;
+
+  void toggleLocale() {
+    _locale = _locale.languageCode == 'en' ? Locale('ru') : Locale('en');
+    notifyListeners();
+  }
+}
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -11,7 +33,6 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   final AudioPlayer audioPlayer = AudioPlayer();
   bool _isMusicEnabled = false;
-  bool _isDarkThemeEnabled = false;
 
   @override
   void initState() {
@@ -25,17 +46,18 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: _isDarkThemeEnabled ? ThemeData.dark() : ThemeData.light(),
-      child: Scaffold(
+    final theme = Provider.of<ThemeProvider>(context);
+    bool isDark = theme.themeMode == ThemeMode.dark;
+    final locale = Provider.of<LocaleProvider>(context);
+    return Scaffold(
         appBar: AppBar(
           title: Text('Settings'),
         ),
         body: Column(
           children: [
             SwitchListTile(
-              title: Text('Music'),
-              subtitle: Text('ON/OFF music'),
+              title: Text(AppLocalizations.of(context)!.music),
+              subtitle: Text('Enable music'),
               value: _isMusicEnabled,
               onChanged: (value) {
                 setState(() {
@@ -50,18 +72,24 @@ class _SettingsState extends State<Settings> {
               },
             ),
             SwitchListTile(
-              title: Text('Switch Theme'),
-              subtitle: Text('Light/Dark theme'),
-              value: _isDarkThemeEnabled,
+              title: Text(AppLocalizations.of(context)!.theme),
+              subtitle: Text('Enable dark theme'),
+              value: isDark,
               onChanged: (value) {
                 setState(() {
-                  _isDarkThemeEnabled = value;
+                  isDark = value;
+                  theme.toggleTheme(isDark);
                 });
               },
-            )
+            ),
+            ElevatedButton(
+              onPressed: () {
+                locale.toggleLocale();
+              },
+              child: Text(AppLocalizations.of(context)!.language),
+            ),
           ],
         ),
-      ),
     );
   }
 }

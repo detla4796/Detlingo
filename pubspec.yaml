@@ -10,7 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.5.3
+  provider: ^6.0.5
   just_audio: ^0.10.0
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
 dev_dependencies:
   flutter_test:
@@ -19,6 +23,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - image/
     - audio/
