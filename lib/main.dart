@@ -10,9 +10,14 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Language Learning App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.light(
+          primary: Colors.green,
+        ),
+      ),
       home: MenuScreen(),
     );
   }
