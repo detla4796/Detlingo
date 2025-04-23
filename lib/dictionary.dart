@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Dictionary extends StatefulWidget {
   const Dictionary({super.key});
@@ -12,14 +14,68 @@ class Words {
   String translation;
 
   Words(this.englishWord, this.translation);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'english' : englishWord,
+      'russian' : translation
+    };
+  }
+
+  static Words fromMap(Map<String, dynamic> map) {
+    return Words(
+      map['english'],
+      map['russian'],
+    );
+  }
+
+  String toJson() {
+    final map = toMap();
+    return json.encode(map);
+  }
+
+  static Words fromJson(jsonString) {
+    final map = json.decode(jsonString);
+    return fromMap(map);
+  }
 }
 
 class _DictionaryState extends State<Dictionary> {
   final TextEditingController englishController = TextEditingController();
   final TextEditingController translationController = TextEditingController();
   final TextEditingController searchController = TextEditingController();
-  final List<Words> words = [];
+  List<Words> words = [];
   List<Words> filteredWords = [];
+
+  _saveWords() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> jsonList = words.map((item) => item.toJson()).toList();
+    await prefs.setStringList('words', jsonList);
+  }
+
+  _loadWords() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? jsonList = prefs.getStringList('words');
+    if (jsonList != null) {
+      setState(() {
+        words = jsonList.map((item) => Words.fromJson(item)).toList();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWords();
+  }
+
+  @override
+  void dispose() {
+    englishController.dispose();
+    translationController.dispose();
+    searchController.dispose();
+    super.dispose();
+  }
 
   void sortEng() {
     setState(() {
@@ -158,6 +214,7 @@ class _DictionaryState extends State<Dictionary> {
                   if (!hasDuplicate(englishController.text, translationController.text)) {
                     setState(() {
                       words.add(Words(englishController.text, translationController.text));
+                      _saveWords();
                     });
                     Navigator.of(context).pop();
                     englishController.clear();
@@ -222,7 +279,8 @@ class _DictionaryState extends State<Dictionary> {
                 if (englishController.text.isNotEmpty && translationController.text.isNotEmpty) {
                   if (!hasDuplicate(englishController.text, translationController.text)) {
                     setState(() {
-                      words.add(Words(englishController.text, translationController.text));
+                      words[index] = Words(englishController.text, translationController.text);
+                      _saveWords();
                     });
                     Navigator.of(context).pop();
                     englishController.clear();
@@ -245,14 +303,6 @@ class _DictionaryState extends State<Dictionary> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    englishController.dispose();
-    translationController.dispose();
-    searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -304,6 +354,7 @@ class _DictionaryState extends State<Dictionary> {
                     onPressed: () {
                       setState(() {
                         words.removeAt(index);
+                        _saveWords();
                       });
                     },
                   ),

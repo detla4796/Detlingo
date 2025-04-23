@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lessons_app/settings.dart';
 import 'lessons.dart';
 import 'dictionary.dart';
 
@@ -39,6 +40,10 @@ class MenuScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Settings()),
+                );
               },
               child: Text('Settings', style: TextStyle(fontSize: 20)),
             ),
