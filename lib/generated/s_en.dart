@@ -19,4 +19,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get language => 'Change language';
+
+  @override
+  String get musicPlay => 'Play';
+
+  @override
+  String get musicPause => 'Pause';
+
+  @override
+  String get musicStop => 'Stop';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get themeSubtitle => 'Enable dark theme';
 }

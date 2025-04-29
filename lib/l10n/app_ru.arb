@@ -3,5 +3,10 @@
     "titleSettings" : "Настройки",
     "music" : "Музыка",
     "theme" : "Сменить тему",
-    "language" : "Сменить язык"
+    "language" : "Сменить язык",
+    "musicPlay" : "Воспроизвести",
+    "musicPause" : "Пауза",
+    "musicStop" : "Стоп",
+    "settings" : "Настройки",
+    "themeSubtitle" : "Включить темную тему"
 }

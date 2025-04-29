@@ -7,5 +7,15 @@
     "theme" : "Change theme",
     "@theme" : {},
     "language" : "Change language",
-    "@language" : {}
+    "@language" : {},
+    "musicPlay" : "Play",
+    "@musicPlay" : {},
+    "musicPause" : "Pause",
+    "@musicPause" : {},
+    "musicStop" : "Stop",
+    "@musicStop" : {},
+    "settings" : "Settings",
+    "@settings" : {},
+    "themeSubtitle" : "Enable dark theme",
+    "@themeSubtitle" : {}
 }

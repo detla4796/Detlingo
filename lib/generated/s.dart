@@ -118,6 +118,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change language'**
   String get language;
+
+  /// No description provided for @musicPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get musicPlay;
+
+  /// No description provided for @musicPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get musicPause;
+
+  /// No description provided for @musicStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get musicStop;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @themeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable dark theme'**
+  String get themeSubtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

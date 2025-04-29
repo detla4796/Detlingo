@@ -19,4 +19,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get language => 'Сменить язык';
+
+  @override
+  String get musicPlay => 'Воспроизвести';
+
+  @override
+  String get musicPause => 'Пауза';
+
+  @override
+  String get musicStop => 'Стоп';
+
+  @override
+  String get settings => 'Настройки';
+
+  @override
+  String get themeSubtitle => 'Включить темную тему';
 }

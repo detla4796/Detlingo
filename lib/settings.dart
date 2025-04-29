@@ -32,16 +32,45 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   final AudioPlayer audioPlayer = AudioPlayer();
-  bool _isMusicEnabled = false;
+  bool isPlaying = false;
+  int currentTrackIndex = 0;
+  double volume = 1;
+
+  final List<String> tracks = [
+    'audio/rain.mp3',
+    'audio/forest.mp3',
+    'audio/ocean.mp3',
+  ];
 
   @override
   void initState() {
     super.initState();
     playAudio();
+    audioPlayer.setVolume(volume);
   }
 
-  Future<void> playAudio() async {
-    await audioPlayer.setAsset('audio/rain.mp3');
+  void playAudio() async {
+    await audioPlayer.setAsset(tracks[currentTrackIndex]);
+  }
+
+  void changeTrack() {
+    setState(() {
+      currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+      playAudio();
+      if (isPlaying) {
+        audioPlayer.play();
+      }
+    });
+  }
+
+  void previousTrack() {
+    setState(() {
+      currentTrackIndex = (currentTrackIndex - 1) % tracks.length;
+      playAudio();
+      if (isPlaying) {
+        audioPlayer.play();
+      }
+    });
   }
 
   @override
@@ -51,29 +80,13 @@ class _SettingsState extends State<Settings> {
     final locale = Provider.of<LocaleProvider>(context);
     return Scaffold(
         appBar: AppBar(
-          title: Text('Settings'),
+          title: Text(AppLocalizations.of(context)!.settings),
         ),
         body: Column(
           children: [
             SwitchListTile(
-              title: Text(AppLocalizations.of(context)!.music),
-              subtitle: Text('Enable music'),
-              value: _isMusicEnabled,
-              onChanged: (value) {
-                setState(() {
-                  _isMusicEnabled = value;
-                  if (_isMusicEnabled) {
-                    audioPlayer.play();
-                  } 
-                  else {
-                    audioPlayer.pause();
-                  }
-                });
-              },
-            ),
-            SwitchListTile(
               title: Text(AppLocalizations.of(context)!.theme),
-              subtitle: Text('Enable dark theme'),
+              subtitle: Text(AppLocalizations.of(context)!.themeSubtitle),
               value: isDark,
               onChanged: (value) {
                 setState(() {
@@ -82,11 +95,81 @@ class _SettingsState extends State<Settings> {
                 });
               },
             ),
+            SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
                 locale.toggleLocale();
               },
               child: Text(AppLocalizations.of(context)!.language),
+            ),
+            SizedBox(height: 10),
+            Text(AppLocalizations.of(context)!.music),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: previousTrack,
+                  icon: Icon(Icons.skip_previous),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      audioPlayer.play();
+                      isPlaying = true;
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.musicPlay),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      audioPlayer.pause();
+                      isPlaying = false;
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.musicPause),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      audioPlayer.stop();
+                      isPlaying = false;
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.musicStop),
+                ),
+                SizedBox(width: 10),
+                IconButton(
+                  onPressed: changeTrack,
+                  icon: Icon(Icons.skip_next),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                children: [ 
+                  Icon(Icons.volume_down),
+                  Expanded(
+                    child: Slider(
+                      value: volume,
+                      min: 0,
+                      max: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          volume = value;
+                          audioPlayer.setVolume(volume);
+                        });
+                      },
+                    ),
+                  ),
+                  Icon(Icons.volume_up),
+                ],
+              )
             ),
           ],
         ),
